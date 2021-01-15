@@ -73,6 +73,7 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 			case 'k':
 				square_index = temp_file * 16 + (temp_rank - 1);
 				board_representation.add_piece(black_king, square_index);
+				board_representation.black_king_square = square_index;
 				break;
 
 
@@ -113,6 +114,7 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 			case 'K':
 				square_index = temp_file * 16 + (temp_rank - 1);
 				board_representation.add_piece(white_king, square_index);
+				board_representation.white_king_square = square_index;
 				break;
 
 			case '/':
@@ -135,8 +137,8 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 
 	iss >> side_move;
 
-	if (side_move == 'b') board_representation.set_side(black);
-	else board_representation.set_side(white);
+	if (side_move == 'b') board_representation.set_side(false);
+	else board_representation.set_side(true);
 
 	std::string castle_rights;
 

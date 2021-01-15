@@ -2,6 +2,8 @@
 //
 
 #include <iostream>
+#include <cstdio>
+#include <ctime>
 #include "BoardInitialization.h"
 #include "BoardRepresentation.h"
 #include "MoveGen.h"
@@ -10,7 +12,8 @@ int main()
 {
 
 
-    std::cout << "Hello World!\n";
+    std::clock_t start;
+    double duration;
 
     BoardInitialization bi = BoardInitialization();
 
@@ -19,23 +22,38 @@ int main()
     MoveGen mg = MoveGen();
 
 
-    bi.board_initialization("8/8/4q3/8/4B3/4K3/8/8 w - - 0 1", br);
+    bi.board_initialization("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", br);
 
   //  br.print_the_board();
 
-    std::cout << std::endl;
+    //std::cout << std::endl;
 
-    mg.generate_pseudo_legal_moves(br);
+    start = std::clock();
 
-    mg.generate_legal_moves(br, white);
+    int x = mg.perft(br, 4);
 
-   // Move new_move = Move(b1, c3, white_knight, false);
+    //int x = mg.perft_divide(br, 5, 5);
 
-  // mg.make_move(br, new_move);
+    std::cout << "nodes: " << x << std::endl;
 
-    std::cout << std::endl;
+    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
-    mg.print_move_list();
+    std::cout << "duration: " << duration;
+     
+  //  Move new_move = Move(1, 34, white_knight, null_piece, false, ' ', false);
+
+   // mg.make_move(br, new_move);
+
+   // Move new_movee = Move(3, 4, white_king, null_piece, false, ' ', false);
+
+//    mg.make_move(br, new_movee);
+
+
+   // std::map<int, int> usable_piece_list = br.get_piece_list();
+
+   // std::cout << std::endl;
+
+   // mg.print_move_list();
 
 
     

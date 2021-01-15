@@ -30,13 +30,17 @@ BoardRepresentation::BoardRepresentation()
 	for_print.insert(std::pair<char, int>(white_queen, 'Q'));
 	for_print.insert(std::pair<char, int>(white_king, 'K'));
 
+	white_king_square = e1;
+	black_king_square = e8;
+
 
 }
 
 void BoardRepresentation::add_piece(unsigned char piece, unsigned char index)
 {
 	chess_board[index] = piece;
-	piece_list.insert(std::pair <int, int>(index, piece));
+	//piece_list.insert(std::pair <int, int>(index, piece));
+	piece_list[index] = piece;
 
 }
 
@@ -52,9 +56,9 @@ void BoardRepresentation::set_chess_board(std::array<int, board_size> b)
 	chess_board = b;
 }
 
-void BoardRepresentation::set_side(char ch)
+void BoardRepresentation::set_side(bool side)
 {
-	side_turn = ch;
+	side_turn = side;
 }
 
 void BoardRepresentation::set_castling_rights(std::string str)
@@ -80,30 +84,30 @@ void BoardRepresentation::print_the_board() {
 	}
 }
 
-std::map<int, int> BoardRepresentation::get_piece_list() {
+std::map<int, int> BoardRepresentation::get_piece_list() const {
 	return piece_list;
 }
 
-std::array<int, board_size> BoardRepresentation::get_chess_board() {
+std::array<int, board_size> BoardRepresentation::get_chess_board() const {
 	return chess_board;
 }
 
-int BoardRepresentation::get_enpassant()
+int BoardRepresentation::get_enpassant() const
 {
 	return enpassant;
 }
 
-char BoardRepresentation::get_side()
+bool BoardRepresentation::get_side() const
 {
 	return side_turn;
 }
 
-std::string BoardRepresentation::get_castling_rights()
+std::string BoardRepresentation::get_castling_rights() const
 {
-	return std::string();
+	return castling_rights;
 }
 
-bool BoardRepresentation::is_on_board(int index) {
+bool BoardRepresentation::is_on_board(int index) const {
 	return ((index & 0x88) == 0);
 }
 
