@@ -39,15 +39,40 @@ BoardRepresentation::BoardRepresentation()
 void BoardRepresentation::add_piece(unsigned char piece, unsigned char index)
 {
 	chess_board[index] = piece;
-	//piece_list.insert(std::pair <int, int>(index, piece));
-	piece_list[index] = piece;
 
+	// EXPERIMENTAL THINGS THAT CAN BE DELETED
+
+	//index_board[index] = piece_lists.size();
+	//piece_lists.push_back(index);
+	////piece_list[index] = piece;
+
+	//if (piece_lists.size() == 33) {
+	////	std::cout << "help";
+	//}
+
+}
+
+void BoardRepresentation::add_pieceo(unsigned char index){
+	
+	chess_board[index] = null_piece;	
 }
 
 void BoardRepresentation::remove_piece(unsigned char index)
 {
-	piece_list.erase(index);
+
+	if (index == 113) {
+	//	std::cout << "help";
+	}
+	//piece_list.erase(index);
 	chess_board[index] = null_piece;
+
+
+	//// EXPERIMENTAL THINGS THAT CAN BE DELETED
+	//int last = piece_lists.back();
+	//piece_lists[index_board[index]] = last;
+	//index_board[last] = index_board[index];
+	//piece_lists.erase(piece_lists.end() - 1);
+
 
 }
 
@@ -55,6 +80,7 @@ void BoardRepresentation::set_chess_board(std::array<int, board_size> b)
 {
 	chess_board = b;
 }
+
 
 void BoardRepresentation::set_side(bool side)
 {
@@ -68,7 +94,7 @@ void BoardRepresentation::set_castling_rights(std::string str)
 
 void BoardRepresentation::set_enpassant(int index)
 {
-	enpassant = index - 16;
+	enpassant = index;
 }
 
 void BoardRepresentation::set_halfmove(int n)
@@ -84,28 +110,28 @@ void BoardRepresentation::print_the_board() {
 	}
 }
 
-std::map<int, int> BoardRepresentation::get_piece_list() const {
-	return piece_list;
-}
+//std::map<int, int> BoardRepresentation::get_piece_list() const {
+//	return piece_list;
+//}
 
-std::array<int, board_size> BoardRepresentation::get_chess_board() const {
-	return chess_board;
-}
+//std::array<int, board_size> BoardRepresentation::get_chess_board() const {
+//	return chess_board;
+//}
 
-int BoardRepresentation::get_enpassant() const
-{
-	return enpassant;
-}
+//int BoardRepresentation::get_enpassant() const
+//{
+//	return enpassant;
+//}
 
-bool BoardRepresentation::get_side() const
-{
-	return side_turn;
-}
+//bool BoardRepresentation::get_side() const
+//{
+//	return side_turn;
+//}
 
-std::string BoardRepresentation::get_castling_rights() const
-{
-	return castling_rights;
-}
+//std::string BoardRepresentation::get_castling_rights() const
+//{
+//	return castling_rights;
+//}
 
 bool BoardRepresentation::is_on_board(int index) const {
 	return ((index & 0x88) == 0);
@@ -113,7 +139,7 @@ bool BoardRepresentation::is_on_board(int index) const {
 
 int BoardRepresentation::return_square(std::string square)
 {
-	int file_char;
+	int file_char = 0;
 
 	if (square.at(0) == 'a') {
 		file_char = 0;
@@ -140,7 +166,17 @@ int BoardRepresentation::return_square(std::string square)
 		file_char = 7;
 	}
 
-	return file_char * 16 + (square.at(1) - 1);
+	int x = 16 * (square.at(1) - '0' - 1) + file_char;
+
+	return x;
+}
+
+void BoardRepresentation::print_piece_lists()
+{
+	for (int i = 0; i < piece_lists.size(); ++i) {
+		std::cout << piece_lists[i];
+		std::cout << std::endl;
+	}
 }
 
 std::ostream& operator<<(std::ostream& o, std::vector <std::string> vec)

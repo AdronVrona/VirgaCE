@@ -26,7 +26,7 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 
 				int square_index = temp_file * 16 + (temp_rank - 1);
 
-				board_representation.add_piece(null_piece, square_index);
+				board_representation.add_pieceo(square_index);
 				
 				++temp_rank;
 			}
@@ -35,6 +35,7 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 
 		else {
 			int square_index = 0;
+
 
 			switch (ch) {
 
@@ -151,8 +152,6 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 	iss >> en_passant;
 
 	if (en_passant != "-") {
-
-		iss >> en_passant;
 
 		board_representation.set_enpassant(board_representation.return_square(en_passant));
 			

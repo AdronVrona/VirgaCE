@@ -1,25 +1,37 @@
 
+#ifndef MOVEGEN_CLASS 
+#define MOVEGEN_CLASS
+
 #include "Move.h"
 #include "BoardRepresentation.h"
 #include <list>
 #include <iostream>
 #include <string>
 
+
 class MoveGen {
 
 
 	private:
 
-		std::list<Move> move_list;
-		std::list<Move> legal_move_list;
-		std::list<Move> made_moves;
+		std::vector<Move> move_list;
+		std::vector<Move> legal_move_list;
+		std::vector<Move> made_moves;
 		std::map<int, std::string> for_print_movegen;
 		int capture_count;
 
+		struct irr_info {
+			int last_enpassant;
+			std::string last_castle;
+			int halfmove_clock;
+		};
+
+		std::vector <struct irr_info> main_info;
 
 	public: 
 
-		std::list<Move> get_move_list();
+		std::vector<Move> get_move_list();
+		std::vector<Move> get_legal_move_list() { return legal_move_list; }
 
 		//generate moves
 		void generate_pl_pawn_moves(const BoardRepresentation& board_representation, int index);
@@ -37,6 +49,7 @@ class MoveGen {
 
 
 		//helper methods
+		void initialize_struct(const BoardRepresentation& board_representation);
 		inline bool is_attacked(const BoardRepresentation& board_representation, int index, int color);
 		inline bool can_capture(const BoardRepresentation& board_representation, int index, int target_square);
 		long perft(BoardRepresentation& board_representation, int depth);
@@ -55,3 +68,5 @@ class MoveGen {
 
 
 };
+
+#endif

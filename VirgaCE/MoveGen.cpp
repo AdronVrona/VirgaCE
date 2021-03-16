@@ -67,12 +67,9 @@ MoveGen::MoveGen() {
 	for_print_movegen.insert(std::pair<int, std::string>(118, "g8"));
 	for_print_movegen.insert(std::pair<int, std::string>(119, "h8"));
 
-
-
-
 }
 
-std::list<Move> MoveGen::get_move_list()
+std::vector<Move> MoveGen::get_move_list()
 {
 	return move_list;
 }
@@ -81,69 +78,89 @@ void MoveGen::generate_pseudo_legal_moves(const BoardRepresentation& board_repre
 {
 	move_list.clear();
 
-	for (const auto& map_pair : board_representation.get_piece_list()) {
+	std::array<int, board_size> board_arr = board_representation.get_chess_board();
 
-		int helper = map_pair.second & piece_color_check;
+	//for (const auto& map_pair : board_representation.get_piece_list()) {
+	for (int i = 0; i < 120; ++i) {
 
-		if (((helper == white) && board_representation.get_side()) || (helper == black) && !board_representation.get_side()){
+	if (i % 8 == 0 && i != 0 && i < 112) i = i + 8;
 
-			switch (map_pair.second) {
+	//NEWNEW
+	//for (int i : board_representation.get_piece_lists()) {
 
-			case (white_pawn):
-			case (black_pawn): {
+			int helper_two = 0;
 
-				generate_pl_pawn_moves(board_representation, map_pair.first);
-				break;
+			//int helper = map_pair.second & piece_color_check;
 
+			if (board_arr[i] > 0) {
+				helper_two = board_arr[i];
+
+
+				int helper = helper_two & piece_color_check;
+
+				if (((helper == white) && board_representation.get_side()) || ((helper == black) && !board_representation.get_side())) {
+
+					switch (helper_two) {
+
+					case (white_pawn):
+					case (black_pawn): {
+
+						generate_pl_pawn_moves(board_representation, i);
+						break;
+
+					}
+
+					case(white_knight):
+					case(black_knight): {
+
+						generate_pl_leaping_moves(board_representation, i, knight_offset, leaping_array_size);
+						break;
+
+					}
+
+					case(white_bishop):
+					case(black_bishop): {
+
+						int array_size = 4;
+						generate_pl_sliding_moves(board_representation, i, bishop_offset, sliding_array_size);
+						break;
+
+					}
+
+					case(white_rook):
+					case(black_rook): {
+
+
+						generate_pl_sliding_moves(board_representation, i, rook_offset, sliding_array_size);
+						break;
+
+					}
+
+					case(white_king):
+					case(black_king): {
+
+						generate_pl_leaping_moves(board_representation, i, king_offset, leaping_array_size);
+						generate_pl_castle_moves(board_representation, i);
+						break;
+
+					}
+
+					case(white_queen):
+					case(black_queen): {
+
+						generate_pl_sliding_moves(board_representation, i, queen_offset, queen_array_size);
+						break;
+
+					}
+
+					}
+
+				}
+
+				//NEEDTHIS}
+
+			//new new
 			}
-
-			case(white_knight):
-			case(black_knight): {
-
-				generate_pl_leaping_moves(board_representation, map_pair.first, knight_offset, leaping_array_size);
-				break;
-
-			}
-
-			case(white_bishop):
-			case(black_bishop): {
-
-				int array_size = 4;
-				generate_pl_sliding_moves(board_representation, map_pair.first, bishop_offset, sliding_array_size);
-				break;
-
-			}
-
-			case(white_rook):
-			case(black_rook): {
-
-	
-				generate_pl_sliding_moves(board_representation, map_pair.first, rook_offset, sliding_array_size);
-				break;
-
-			}
-
-			case(white_king):
-			case(black_king): {
-
-				generate_pl_leaping_moves(board_representation, map_pair.first, king_offset, leaping_array_size);
-				generate_pl_castle_moves(board_representation, map_pair.first);
-				break;
-
-			}
-
-			case(white_queen):
-			case(black_queen): {
-
-				generate_pl_sliding_moves(board_representation, map_pair.first, queen_offset, queen_array_size);
-				break;
-
-			}
-
-			}
-
-		}
-
 	}
 
 }
@@ -152,7 +169,8 @@ void MoveGen::generate_pl_pawn_moves(const BoardRepresentation& board_representa
 {
 
 	std::array<int, board_size> board_arr = board_representation.get_chess_board();
-
+	
+	int promotion_helper = board_arr[index] & piece_color_check;
 	int color = 1;
 
 	if (board_arr[index] & black) color = -1;
@@ -168,35 +186,46 @@ void MoveGen::generate_pl_pawn_moves(const BoardRepresentation& board_representa
 			// PAWN MOVING FORWARD
 			if (i == 0 && board_arr[target_square] == null_piece) {
 
-				move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', false));
+				if (((index < a3 && color == 1) || (index > h6 && color == -1)) && board_arr[index + color * offset * 2] == null_piece) {
 
-				if ((index < a3 && color == 1) || (index > h6 && color == -1)) {
+						move_list.push_back(Move(index, index + color * offset * 2, board_arr[index], null_piece, true, ' ', null_piece));
+						move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', null_piece));
 
-					if (board_arr[index + color * offset * 2] == null_piece) {
-
-						move_list.push_back(Move(index, index + color * offset * 2, board_arr[index], null_piece, true, ' ', false));
-
-					}
+					
 				}
 				else if ((index <= h2 && color == -1) || (index >= a7 && color == 1)) {
-					if (i != 0 && board_arr[target_square] != 0 && (board_arr[index] | board_arr[target_square]) == piece_color_check) {
-						move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', true));
-					}
-
-					move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', true));
-
+					move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', neutral_knight + promotion_helper));
+					move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', neutral_bishop + promotion_helper));
+					move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', neutral_rook + promotion_helper));
+					move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', neutral_queen + promotion_helper));
+					
 				}
+
+				else move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', null_piece));
 			}
-			//PAWN CAPTURE
+			//PAWN CAPTURE	
 			if (i != 0 && board_arr[target_square] != 0 && ((board_arr[index] & piece_color_check) & (board_arr[target_square] & piece_color_check)) == null_piece) {
 
-				move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', false));
+				if ((index <= h2 && color == -1) || (index >= a7 && color == 1)) {
+					move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', neutral_knight + promotion_helper));
+					move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', neutral_bishop + promotion_helper));
+					move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', neutral_rook + promotion_helper));
+					move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', neutral_queen + promotion_helper));
+
+				}
+				else move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', null_piece));
 
 			}
 			//ENPASSANT 
-			if (i != 0 && target_square == board_representation.get_enpassant() && (board_arr[index] | board_arr[target_square]) == piece_color_check) {
+			if (i != 0 && target_square == board_representation.get_enpassant()) {
 
-				move_list.push_back(Move(index, board_representation.get_enpassant(), board_arr[index], board_arr[target_square], false, ' ', false));
+				if ((board_arr[index] & piece_color_check) == white && board_arr[target_square - 16] == black_pawn) {
+					move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square - 16], true, ' ', null_piece));
+				}
+
+				if ((board_arr[index] & piece_color_check) == black && board_arr[target_square + 16] == white_pawn) {
+					move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square + 16], true, ' ', null_piece));
+				}
 
 			}
 				
@@ -210,10 +239,7 @@ void MoveGen::generate_pl_sliding_moves(const BoardRepresentation& board_represe
 {
 
 	std::array<int, board_size> board_arr = board_representation.get_chess_board();
-
-	int color = 1;
-
-	if (board_arr[index] & black) color = -1;
+	
 
 	for (int i = 0; i < array_size ; ++i) {
 
@@ -223,13 +249,13 @@ void MoveGen::generate_pl_sliding_moves(const BoardRepresentation& board_represe
 
 			if (((board_arr[target_square] & board_arr[index]) & 0x03) == 0 && board_arr[target_square] > null_piece) {
 
-				move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', false));
+				move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', null_piece));
 
 				break;
 
 			}
 
-			else if (board_arr[target_square] == 0) move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', false));
+			else if (board_arr[target_square] == 0) move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', null_piece));
 
 			else break;
 
@@ -246,6 +272,7 @@ void MoveGen::generate_pl_leaping_moves(const BoardRepresentation& board_represe
 
 	std::array<int, board_size> board_arr = board_representation.get_chess_board();
 	
+	
 	int color = 1;
 
 	if (board_arr[index] & black) color = -1;
@@ -258,10 +285,10 @@ void MoveGen::generate_pl_leaping_moves(const BoardRepresentation& board_represe
 
 			if (((board_arr[target_square] & board_arr[index]) & piece_color_check) == 0 && board_arr[target_square] > 0) {
 
-				move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', false));
+				move_list.push_back(Move(index, target_square, board_arr[index], board_arr[target_square], false, ' ', null_piece));
 			}
 
-			else if (board_arr[target_square] == 0) move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', false));
+			else if (board_arr[target_square] == 0) move_list.push_back(Move(index, target_square, board_arr[index], null_piece, false, ' ', null_piece));
 
 		}
 
@@ -302,6 +329,7 @@ void MoveGen::generate_legal_moves(BoardRepresentation& board_representation, in
 void MoveGen::generate_pl_castle_moves(const BoardRepresentation& board_representation, int index)
 {
 	std::array<int, board_size> board_arr = board_representation.get_chess_board();
+	
 
 	// WHITE CASTLING 
 
@@ -311,7 +339,7 @@ void MoveGen::generate_pl_castle_moves(const BoardRepresentation& board_represen
 
 		if (board_arr[index + 1] == null_piece && board_arr[index + 2] == null_piece && board_arr[index + 3] == white_rook && board_representation.get_castling_rights().find('K') != std::string::npos) {
 			if (!(is_attacked(board_representation, index, black) || is_attacked(board_representation, index + 1, black) || is_attacked(board_representation, index + 2, black))) {
-				move_list.push_back(Move(index, index + 2, white_king, null_piece, false, 'K', false));
+				move_list.push_back(Move(index, index + 2, white_king, null_piece, false, 'K', null_piece));
 			}
 		}
 
@@ -320,7 +348,7 @@ void MoveGen::generate_pl_castle_moves(const BoardRepresentation& board_represen
 		if (board_representation.get_castling_rights().find('Q')!= std::string::npos) {
 			if (board_arr[index - 1] == null_piece && board_arr[index - 2] == null_piece && board_arr[index - 3] == null_piece && board_arr[index - 4] == white_rook) {
 				if (!(is_attacked(board_representation, index, black) || is_attacked(board_representation, index - 1, black) || is_attacked(board_representation, index - 2, black))) {
-					move_list.push_back(Move(index, index - 2, white_king, null_piece, false, 'Q', false));
+					move_list.push_back(Move(index, index - 2, white_king, null_piece, false, 'Q', null_piece));
 				}
 			}
 		}
@@ -334,16 +362,16 @@ void MoveGen::generate_pl_castle_moves(const BoardRepresentation& board_represen
 		// SHORT CASTLE 
 
 		if (board_arr[index + 1] == null_piece && board_arr[index + 2] == null_piece && board_arr[index + 3] == black_rook && board_representation.get_castling_rights().find('k') != std::string::npos) {
-			if (!(is_attacked(board_representation, index, white) || is_attacked(board_representation, index - 1, white) || is_attacked(board_representation, index - 2, white))) {
-				move_list.push_back(Move(index, index + 2, black_king, null_piece, false, 'k', false));
+			if (!(is_attacked(board_representation, index, white) || is_attacked(board_representation, index + 1, white) || is_attacked(board_representation, index + 2, white))) {
+				move_list.push_back(Move(index, index + 2, black_king, null_piece, false, 'k', null_piece));
 			}
 		}
 
 		//LONG CASTLE
 
 		if (board_arr[index - 1] == null_piece && board_arr[index - 2] == null_piece && board_arr[index - 3] == null_piece && board_arr[index - 4] == black_rook && board_representation.get_castling_rights().find('q') != std::string::npos) {
-			if (!(is_attacked(board_representation, index, white) || is_attacked(board_representation, index + 1, white) || is_attacked(board_representation, index + 2, white))) {
-				move_list.push_back(Move(index, index - 2, black_king, null_piece, false, 'q', false));
+			if (!(is_attacked(board_representation, index, white) || is_attacked(board_representation, index - 1, white) || is_attacked(board_representation, index - 2, white))) {
+				move_list.push_back(Move(index, index - 2, black_king, null_piece, false, 'q', null_piece));
 			}
 		}
 
@@ -355,25 +383,85 @@ void MoveGen::generate_pl_castle_moves(const BoardRepresentation& board_represen
 void MoveGen::make_move(BoardRepresentation& board_representation, Move m)
 {
 
+
+	board_representation.set_enpassant(13);
+
 	if (m.enpassant == true) {
-		board_representation.set_enpassant(m.end_index);
+		if (m.capture > 0) {
+			if (m.piece_type == white_pawn) board_representation.remove_piece(m.end_index - 16);
+			else board_representation.remove_piece(m.end_index + 16);
+		}
+		else {
+			if (m.piece_type == white_pawn) board_representation.set_enpassant(m.end_index - 16);
+			else board_representation.set_enpassant(m.end_index + 16);
+		}
 	}
 	
 	if (m.piece_type == white_king) {
 		board_representation.white_king_square = m.end_index;
+		std::string set_castle = board_representation.get_castling_rights();
+		set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'K'), set_castle.end());
+		set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'Q'), set_castle.end());
+		board_representation.set_castling_rights(set_castle);
 	}
+
 	if (m.piece_type == black_king) {
 		board_representation.black_king_square = m.end_index;
+		std::string set_castle = board_representation.get_castling_rights();
+		set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'k'), set_castle.end());
+		set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'q'), set_castle.end());
+		board_representation.set_castling_rights(set_castle);
+	}
+
+	if (m.piece_type == white_rook) {
+		if (m.start_index == 0) {
+			std::string set_castle = board_representation.get_castling_rights();
+			set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'Q'), set_castle.end());
+			board_representation.set_castling_rights(set_castle);
+		}
+		if (m.start_index == 7) {
+			std::string set_castle = board_representation.get_castling_rights();
+			set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'K'), set_castle.end());
+			board_representation.set_castling_rights(set_castle);
+		}
+	}
+
+	if (m.piece_type == black_rook) {
+		if (m.start_index == 112) {
+			std::string set_castle = board_representation.get_castling_rights();
+			set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'q'), set_castle.end());
+			board_representation.set_castling_rights(set_castle);
+		}
+		if (m.start_index == 119) {
+			std::string set_castle = board_representation.get_castling_rights();
+			set_castle.erase(std::remove(set_castle.begin(), set_castle.end(), 'k'), set_castle.end());
+			board_representation.set_castling_rights(set_castle);
+		}
 	}
 	
 	if (m.castle != ' ') {
 		make_castle(board_representation, m.castle);
 	}
 
+
+	//// EXPERIMENTAL AS FUCK
+	//if (m.capture > 0) {
+	//	board_representation.remove_piece(m.end_index);
+	//}
+
 	board_representation.remove_piece(m.start_index);
 	board_representation.add_piece(m.piece_type, m.end_index);
 
+	if (m.promotion > 0) {
+		board_representation.add_piece(m.promotion, m.end_index);
+	}
+
+
 	made_moves.push_back(m);
+
+	main_info.push_back({board_representation.get_enpassant(), board_representation.get_castling_rights(), board_representation.get_halfmove()});
+
+
 
 	board_representation.set_side(!board_representation.get_side());
 }
@@ -383,35 +471,46 @@ void MoveGen::un_make_move(BoardRepresentation& board_representation, Move m)
 
 	made_moves.pop_back();
 
-	if (m.piece_type == white_king) {
-		board_representation.white_king_square = m.start_index;
-	}
-	if (m.piece_type == black_king) {
-		board_representation.black_king_square = m.start_index;
-	}
+	main_info.pop_back();
 
+	if (m.piece_type == white_king) board_representation.white_king_square = m.start_index;
 
-	if (m.castle != ' ') {
-		unmake_castle(board_representation, m);
-	}
+	if (m.piece_type == black_king) board_representation.black_king_square = m.start_index;
+
+	if (m.castle != ' ') unmake_castle(board_representation, m);
+
+	if (m.enpassant == true) board_representation.set_enpassant(13);
 
 	board_representation.remove_piece(m.end_index);
 
 	if (m.capture > 0) {
-			board_representation.add_piece(m.capture, m.end_index);
+		if (m.enpassant) {
+			if (m.piece_type == white_pawn) {
+				board_representation.add_piece(m.capture, m.end_index - 16);
+			}
+			if (m.piece_type == black_pawn) {
+				board_representation.add_piece(m.capture, m.end_index + 16);
+			}
+		}
+		else board_representation.add_piece(m.capture, m.end_index);
+			
 	}
 
 	board_representation.add_piece(m.piece_type, m.start_index);
 
 
-
 	if (made_moves.size() > 0) {
-		if (made_moves.back().enpassant) {
-			board_representation.set_enpassant(m.end_index);
+		if (made_moves.back().enpassant && (m.piece_type == white_pawn)) {
+			board_representation.set_enpassant(m.end_index -16);
+		}
+		if (made_moves.back().enpassant && (m.piece_type == black_pawn)) {
+			board_representation.set_enpassant(m.end_index + 16);
 		}
 	}
 
+
 	board_representation.set_side(!board_representation.get_side());
+	board_representation.set_castling_rights(main_info.back().last_castle);
 
 }
 
@@ -467,28 +566,28 @@ void MoveGen::unmake_castle(BoardRepresentation& board_representation, Move m)
 		board_representation.add_piece(white_rook, h1);
 		board_representation.remove_piece(f1);
 		set_castle.push_back('K');
-		set_castle.push_back('Q');
+		if (main_info.back().last_castle.find('Q') != std::string::npos) set_castle.push_back('Q');
 		break;
 	}
 	case ('k'): {
 		board_representation.add_piece(black_rook, h8);
 		board_representation.remove_piece(f8);
 		set_castle.push_back('k');
-		set_castle.push_back('q');
+		if (main_info.back().last_castle.find('q') != std::string::npos) set_castle.push_back('q');
 		break;
 	}
 	case ('Q'): {
 		board_representation.add_piece(white_rook, a1);
 		board_representation.remove_piece(d1);
-		set_castle.push_back('K');
 		set_castle.push_back('Q');
+		if (main_info.back().last_castle.find('K') != std::string::npos) set_castle.push_back('K');
 		break;
 	}
 	case ('q'): {
 		board_representation.add_piece(black_rook, a8);	
 		board_representation.remove_piece(d8);
-		set_castle.push_back('k');
 		set_castle.push_back('q');
+		if (main_info.back().last_castle.find('k') != std::string::npos) set_castle.push_back('k');
 		break;
 	}
 
@@ -503,19 +602,19 @@ bool MoveGen::is_attacked(const BoardRepresentation& board_representation, int i
 {
 
 	std::array<int, board_size> board_arr = board_representation.get_chess_board();
+
 	
 	int target_square = index;
 
-
-
 	//PAWN 
+
 	if (color == white) {
-		if (board_representation.is_on_board(index + pawn_offset[0]) && board_arr[index + pawn_offset[0]] == black_pawn) return true;
-		if (board_representation.is_on_board(index + pawn_offset[2]) && board_arr[index + pawn_offset[2]] == black_pawn) return true;
+		if (board_representation.is_on_board(index - pawn_offset[1]) && board_arr[index - pawn_offset[1]] == white_pawn) return true;
+		if (board_representation.is_on_board(index - pawn_offset[2]) && board_arr[index - pawn_offset[2]] == white_pawn) return true;
 	}
 	else {
-		if (board_representation.is_on_board(index - pawn_offset[0]) && board_arr[index - pawn_offset[0]] == white_pawn) return true;
-		if (board_representation.is_on_board(index - pawn_offset[2]) && board_arr[index - pawn_offset[2]] == white_pawn) return true;
+		if (board_representation.is_on_board(index + pawn_offset[1]) && board_arr[index + pawn_offset[1]] == black_pawn) return true;
+		if (board_representation.is_on_board(index + pawn_offset[2]) && board_arr[index + pawn_offset[2]] == black_pawn) return true;
 	}
 
 	//SLIDING -- BISHOP + QUEEN
@@ -528,16 +627,12 @@ bool MoveGen::is_attacked(const BoardRepresentation& board_representation, int i
 
 		while (board_representation.is_on_board(target_square)) {
 
-			// if ((((board_arr[target_square] & piece_color_check) & (board_arr[index] & piece_color_check)) > 0)) break;
-
 			if (board_arr[target_square] != null_piece) {
 
 				if (board_arr[target_square] == neutral_bishop + color || board_arr[target_square] == neutral_queen + color) return true;
 
 				else break;
 			}
-
-		//	if (board_arr[target_square] == neutral_bishop + color || board_arr[target_square] == neutral_queen + color) return true;
 
 			target_square += bishop_offset[i];
 
@@ -577,13 +672,6 @@ bool MoveGen::is_attacked(const BoardRepresentation& board_representation, int i
 				else break;
 			}
 
-			//if (((board_arr[target_square] & piece_color_check) & (board_arr[index] & piece_color_check)) > 0)	break;
-
-			//if (board_arr[target_square] == (neutral_rook + color) || board_arr[target_square] == (neutral_queen + color)) {
-				//std::cout << "target: " << index << std::endl;
-				//return true;
-			//}
-
 			target_square += rook_offset[i];
 
 		}
@@ -611,15 +699,8 @@ bool MoveGen::is_attacked(const BoardRepresentation& board_representation, int i
 
 long MoveGen::perft(BoardRepresentation& board_representation, int depth)
 {
-		int nodes = 0;
+		long long nodes = 0;
 
-	// test positions from CPW
-	//"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"
-	//"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"
-	//"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq -"
-	//"r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ -"
-	//"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ -"
-	//"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - -"
 
 	generate_pseudo_legal_moves(board_representation);
 
@@ -631,13 +712,14 @@ long MoveGen::perft(BoardRepresentation& board_representation, int depth)
 		generate_legal_moves(board_representation, black);
 		//std::cout << "black" << std::endl;
 	}
-	std::list<Move> help = legal_move_list;
+	std::vector<Move> help = legal_move_list;
 
 	//print_move_list();
 
 
 	// bulk count
 	if (depth == 1) {
+	//	print_move_list();
 	//	std::cout << help.size() << std::endl;
 	
 		return help.size();
@@ -645,8 +727,8 @@ long MoveGen::perft(BoardRepresentation& board_representation, int depth)
 
 	for (const auto& move : help) {
 		if (depth == 1) {
-			std::cout << for_print_movegen[move.start_index];
-			std::cout << for_print_movegen[move.end_index];
+			//std::cout << for_print_movegen[move.start_index];
+			//std::cout << for_print_movegen[move.end_index];
 		}
 		//std::cout << "move start: " << move.start_index << "move end: " << move.end_index << std::endl;
 		//if (move.capture > 0) std::cout << "WE GOT ONE" << std::endl;
@@ -665,6 +747,12 @@ long MoveGen::perft(BoardRepresentation& board_representation, int depth)
 inline bool MoveGen::can_capture(const BoardRepresentation& board_representation, int index, int target_square)
 {
 	return true;
+}
+
+void MoveGen::initialize_struct(const BoardRepresentation& board_representation)
+{
+	irr_info start = { board_representation.get_enpassant(), board_representation.get_castling_rights(), board_representation.get_halfmove() };
+	main_info.push_back(start);
 }
 
 void MoveGen::print_move_list()
@@ -686,20 +774,18 @@ long MoveGen::perft_divide(BoardRepresentation& board_representation, int depth,
 
 	if (board_representation.get_side()) {
 		generate_legal_moves(board_representation, white);
-	
 	}
 	else {
 		generate_legal_moves(board_representation, black);
-		
-	}
-	std::list<Move> help = legal_move_list;
+	}	
+	std::vector<Move> help = legal_move_list;
 
 	//print_move_list();
 
 
 	// bulk count
 	if (depth == 1) {
-		//print_move_list();
+		if (divide == 1) print_move_list();
 		nodes = 0;
 		return help.size();
 	}

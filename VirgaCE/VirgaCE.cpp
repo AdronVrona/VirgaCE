@@ -7,13 +7,22 @@
 #include "BoardInitialization.h"
 #include "BoardRepresentation.h"
 #include "MoveGen.h"
+#include "Search.h"
+#include "UCI.h"
+#include "TranspositionTable.h"
 
 int main()
 {
 
-
     std::clock_t start;
     double duration;
+
+
+
+    // -------------------- FACTORY -------------------------------//
+
+
+
 
     BoardInitialization bi = BoardInitialization();
 
@@ -21,39 +30,67 @@ int main()
 
     MoveGen mg = MoveGen();
 
+    TranspositionTable tt = TranspositionTable();
 
-    bi.board_initialization("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", br);
+    Search sh = Search(mg);
 
-  //  br.print_the_board();
 
-    //std::cout << std::endl;
+    // -------------------------------------------------------------//
 
+
+   // UCI uci = UCI();
+
+  //  uci.UCI_communication();
+
+        // -------------------- FACTORY -------------------------------//
+
+
+    bi.board_initialization("3rr3/8/k7/8/8/K2R4/4R2b/8 w - - 0 1", br);
+
+   mg.initialize_struct(br);
+
+    //tt.zobrist_initialization();
+
+   // tt.hash_position(br);
+
+//    br.print_piece_lists();
+        
     start = std::clock();
 
-    int x = mg.perft(br, 4);
+    //mg.generate_pseudo_legal_moves(br);
 
-    //int x = mg.perft_divide(br, 5, 5);
+    //mg.generate_legal_moves(br, white);
 
-    std::cout << "nodes: " << x << std::endl;
+  //  sh.sort_moves(mg.get_legal_move_list());
+
+    sh.search(br);
+
+
+
+  // -------------------- PERFT -------------------------------//
+
+
+
+
+  // long long x = mg.perft(br, 4);
+
+   // int x = mg.perft_divide(br, 3,3); 
+
+    // std::cout << "nodes: " << x << std::endl;
+
+
+
+
+  // ----------------------------------------------------------//
+
+
+
+
 
     duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
     std::cout << "duration: " << duration;
      
-  //  Move new_move = Move(1, 34, white_knight, null_piece, false, ' ', false);
-
-   // mg.make_move(br, new_move);
-
-   // Move new_movee = Move(3, 4, white_king, null_piece, false, ' ', false);
-
-//    mg.make_move(br, new_movee);
-
-
-   // std::map<int, int> usable_piece_list = br.get_piece_list();
-
-   // std::cout << std::endl;
-
-   // mg.print_move_list();
 
 
     

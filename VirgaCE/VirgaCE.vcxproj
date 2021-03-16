@@ -141,20 +141,26 @@
   <ItemGroup>
     <ClCompile Include="BoardInitialization.cpp" />
     <ClCompile Include="BoardRepresentation.cpp" />
-    <ClCompile Include="Move.cpp" />
+    <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="MoveGen.cpp" />
-    <ClCompile Include="Piece.cpp" />
     <ClCompile Include="Search.cpp" />
+    <ClCompile Include="TranspositionTable.cpp" />
+    <ClCompile Include="UCI.cpp" />
     <ClCompile Include="VirgaCE.cpp" />
+    <ClCompile Include="ZobristHashing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardInitialization.h" />
     <ClInclude Include="BoardRepresentation.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Move.h" />
     <ClInclude Include="MoveGen.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="Search.h" />
+    <ClInclude Include="TranspositionTable.h" />
+    <ClInclude Include="UCI.h" />
+    <ClInclude Include="ZobristHashing.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="README.txt" />
