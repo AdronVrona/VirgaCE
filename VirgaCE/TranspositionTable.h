@@ -5,44 +5,155 @@
 #include <iostream>
 #include <vector>
 
-#include "Move.h"
-#include "BoardRepresentation.h"
+#include "TTEntry.h"
+#include "MoveGen.h"
+#include "ZobristHashing.h"
+
+#ifndef TT_CLASS 
+#define TT_CLASS
+
+
+//struct Table_Entry {
+//
+//    long zobrist;
+//    Move m;
+//    int depth;
+//    double eval;
+//    int type;
+//
+//    Table_Entry() {};
+//
+//
+//    Table_Entry(long zobrist, Move m, int depth, double eval, int type) :
+//        zobrist(zobrist), m(m), depth(depth), eval(eval), type(type) {};
+//
+//};
 
 class TranspositionTable {
 
-private: 
+private:
 
-	int piece_keys[12][64];
-	int enpassant_keys[64];
-	int castle_keys[4];
-	int side_key;
-	std::vector<int> initial_hashvalues;
 
-	struct TTEntry {
-		long zobrist;
-		Move m;
-		int depth;
-		double eval;
-		int type;
-	};
-
+    TTEntry* table;
+    uint64_t table_size;
+    int counter = 0;
 
 public:
 
-	void zobrist_initialization();
-	void hash_position(const BoardRepresentation& board_representation);
+
+    TranspositionTable(uint64_t size) {
+
+        table_size = size;
+        uint64_t mb = 1024 * 1024 * size;
+        auto xds = mb / sizeof(TTEntry);
+        table = (TTEntry*)std::malloc(mb/sizeof(TTEntry));
+   
+    }
+
+    void put(long key, Move move, int depth, double eval, int type) {
+
+        ++counter;
+
+       // std::cout << "key: " << key << std::endl;
+        //TTEntry entry = get(key);
+
+            int hash = (key % 10000);
+
+            if (hash < 0) hash = hash * -1;
+
+           // std::cout << "hash: " << hash << std::endl;
+
+            table[hash] = TTEntry{ key, move, depth, eval, type };
 
 
+        
 
+    }
 
+    TTEntry get(int key) {
 
+        int hash = (key % 10000);
 
+        if (hash < 0) hash = hash * -1;
 
+        return table[hash];
 
+    }
 
+    std::vector<Move> extract_pv(BoardRepresentation board_representation) {
 
+        MoveGen mg = MoveGen();
 
+        std::vector<Move> current_pv;
 
+        std::cout << ZobristHashing::hash_position(board_representation) << std::endl;
 
+        TTEntry current = get(ZobristHashing::hash_position(board_representation));
 
+       
+        for (int i = 0; i < 6; ++i) {
+
+           // std::cout << "dasdasdsad" << counter << std::endl;
+
+           // std::cout << "start: " << current.move.start_index << std::endl;
+           // std::cout << "end: " << current.move.end_index << std::endl;
+
+            Move current_move = current.move;
+
+            current_pv.push_back(current_move);
+
+            mg.make_move(board_representation, current_move);
+
+            current = get(ZobristHashing::hash_position(board_representation));
+
+        }
+
+        return current_pv;
+
+    }
+
+  /*  TranspositionTable() {
+        table = new TTEntry * [1000];
+        for (int i = 0; i < 1000; i++)
+            table[i] = NULL;
+    }
+
+    TTEntry* get(int key) {
+        int hash = (key % 1000);
+        while (table[hash] != NULL && table[hash]->zobrist != key)
+            hash = (hash + 1) % 1000;
+        if (table[hash] == NULL) {
+            std::cout << "oops";
+        }
+        else return table[hash];
+    }
+
+    void put(long key, int from, int to, int depth, double eval, int type) {
+        int hash = (key % 1000);
+        while (table[hash] != NULL && table[hash]->zobrist != key)
+            hash = (hash + 1) % 1000;
+        if (table[hash] != NULL)
+            delete table[hash];
+        table[hash] = new TTEntry(key, from, to, depth, eval, type);
+    }
+
+    ~TranspositionTable() { 
+        for (int i = 0; i < 1000; i++)
+            if (table[i] != NULL)
+                delete table[i];
+        delete[] table;
+    }*/
 };
+
+
+#endif
+
+
+
+
+
+
+
+
+
+

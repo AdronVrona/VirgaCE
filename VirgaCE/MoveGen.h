@@ -4,6 +4,8 @@
 
 #include "Move.h"
 #include "BoardRepresentation.h"
+#include "ZobristHashing.h"
+
 #include <list>
 #include <iostream>
 #include <string>
@@ -18,19 +20,20 @@ class MoveGen {
 		std::vector<Move> legal_move_list;
 		std::vector<Move> made_moves;
 		std::map<int, std::string> for_print_movegen;
-		int capture_count;
 
 		struct irr_info {
 			int last_enpassant;
 			std::string last_castle;
 			int halfmove_clock;
+			long last_key;
 		};
 
 		std::vector <struct irr_info> main_info;
 
 	public: 
 
-		std::vector<Move> get_move_list();
+		//getters
+		std::vector<Move> get_move_list() { return move_list; }
 		std::vector<Move> get_legal_move_list() { return legal_move_list; }
 
 		//generate moves
@@ -46,6 +49,8 @@ class MoveGen {
 		void un_make_move(BoardRepresentation& board_representation, Move m);
 		void make_castle(BoardRepresentation& board_representation, char ch);
 		void unmake_castle(BoardRepresentation& board_representation, Move m);
+		void make_nullmove(BoardRepresentation& board_representation);
+		void unmake_nullmove(BoardRepresentation& board_representation);
 
 
 		//helper methods
@@ -54,7 +59,6 @@ class MoveGen {
 		inline bool can_capture(const BoardRepresentation& board_representation, int index, int target_square);
 		long perft(BoardRepresentation& board_representation, int depth);
 		long perft_divide(BoardRepresentation& board_representation, int depth, int divide);
-
 		void print_move_list();
 
 		MoveGen();

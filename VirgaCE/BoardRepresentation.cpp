@@ -30,6 +30,18 @@ BoardRepresentation::BoardRepresentation()
 	for_print.insert(std::pair<char, int>(white_queen, 'Q'));
 	for_print.insert(std::pair<char, int>(white_king, 'K'));
 
+	index_convert[white_knight] = 1;
+	index_convert[white_bishop] = 2;
+	index_convert[white_rook] = 3;
+	index_convert[white_queen] = 4;
+	index_convert[white_king] = 5;
+	index_convert[black_pawn] = 6;
+	index_convert[black_knight] = 7;
+	index_convert[black_bishop] = 8;
+	index_convert[black_rook] = 9;
+	index_convert[black_queen] = 10;
+	index_convert[black_king] = 11;
+
 	white_king_square = e1;
 	black_king_square = e8;
 
@@ -59,21 +71,7 @@ void BoardRepresentation::add_pieceo(unsigned char index){
 
 void BoardRepresentation::remove_piece(unsigned char index)
 {
-
-	if (index == 113) {
-	//	std::cout << "help";
-	}
-	//piece_list.erase(index);
 	chess_board[index] = null_piece;
-
-
-	//// EXPERIMENTAL THINGS THAT CAN BE DELETED
-	//int last = piece_lists.back();
-	//piece_lists[index_board[index]] = last;
-	//index_board[last] = index_board[index];
-	//piece_lists.erase(piece_lists.end() - 1);
-
-
 }
 
 void BoardRepresentation::set_chess_board(std::array<int, board_size> b)
@@ -110,29 +108,6 @@ void BoardRepresentation::print_the_board() {
 	}
 }
 
-//std::map<int, int> BoardRepresentation::get_piece_list() const {
-//	return piece_list;
-//}
-
-//std::array<int, board_size> BoardRepresentation::get_chess_board() const {
-//	return chess_board;
-//}
-
-//int BoardRepresentation::get_enpassant() const
-//{
-//	return enpassant;
-//}
-
-//bool BoardRepresentation::get_side() const
-//{
-//	return side_turn;
-//}
-
-//std::string BoardRepresentation::get_castling_rights() const
-//{
-//	return castling_rights;
-//}
-
 bool BoardRepresentation::is_on_board(int index) const {
 	return ((index & 0x88) == 0);
 }
@@ -166,9 +141,8 @@ int BoardRepresentation::return_square(std::string square)
 		file_char = 7;
 	}
 
-	int x = 16 * (square.at(1) - '0' - 1) + file_char;
+	return (16 * (square.at(1) - '0' - 1) + file_char);
 
-	return x;
 }
 
 void BoardRepresentation::print_piece_lists()

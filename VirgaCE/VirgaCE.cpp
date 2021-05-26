@@ -10,12 +10,13 @@
 #include "Search.h"
 #include "UCI.h"
 #include "TranspositionTable.h"
+#include "ZobristHashing.h"
+#include "Evaluation.h"
 
 int main()
 {
 
     std::clock_t start;
-    double duration;
 
 
 
@@ -30,40 +31,64 @@ int main()
 
     MoveGen mg = MoveGen();
 
-    TranspositionTable tt = TranspositionTable();
-
     Search sh = Search(mg);
 
+   // TranspositionTable tt = TranspositionTable();
 
-    // -------------------------------------------------------------//
+
+   // -------------------------------------------------------------//
 
 
    // UCI uci = UCI();
 
   //  uci.UCI_communication();
 
-        // -------------------- FACTORY -------------------------------//
+ 
+    ZobristHashing::zobrist_initialization();
 
+    bi.board_initialization("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ", br);
 
-    bi.board_initialization("3rr3/8/k7/8/8/K2R4/4R2b/8 w - - 0 1", br);
-
-   mg.initialize_struct(br);
-
-    //tt.zobrist_initialization();
-
-   // tt.hash_position(br);
-
-//    br.print_piece_lists();
+    mg.initialize_struct(br);
         
     start = std::clock();
 
-    //mg.generate_pseudo_legal_moves(br);
+    mg.generate_pseudo_legal_moves(br);
 
-    //mg.generate_legal_moves(br, white);
+    mg.generate_legal_moves(br, white);
+
+
+    std::vector<Move> moves = (mg.get_legal_move_list());
+
+    for (Move& move : moves) {
+        std::cout << "test array: " << br.index_convert[move.piece_type] << std::endl;
+        std::cout << move.start_index << " " << move.end_index << std::endl;
+        std::cout << "positions key: " << br.position_key << std::endl;
+        std::cout << "hash key: " << ZobristHashing::hash_position(br) << std::endl;
+        mg.make_move(br, move);
+        std::cout << "positions key after move: " << br.position_key << std::endl;
+        std::cout << "new hash key after move: " << ZobristHashing::hash_position(br) << std::endl;
+        mg.un_make_move(br, move);
+        std::cout << "positions key after un make move: " << br.position_key << std::endl;
+        std::cout << "new hash key after un make move: " << ZobristHashing::hash_position(br) << std::endl;
+        mg.make_nullmove(br);
+        std::cout << "positions key after move: " << br.position_key << std::endl;
+        std::cout << "new hash key after move: " << ZobristHashing::hash_position(br) << std::endl;
+        mg.unmake_nullmove(br);
+        std::cout << "positions key after un make move: " << br.position_key << std::endl;
+        std::cout << "new hash key after un make move: " << ZobristHashing::hash_position(br) << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+
+
+    }
 
   //  sh.sort_moves(mg.get_legal_move_list());
 
-    sh.search(br);
+    
+
+     // sh.search(br);
+
+    //Evaluation::material_eval(br);
 
 
 
@@ -87,7 +112,7 @@ int main()
 
 
 
-    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+    auto duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
     std::cout << "duration: " << duration;
      

@@ -142,6 +142,7 @@
     <ClCompile Include="BoardInitialization.cpp" />
     <ClCompile Include="BoardRepresentation.cpp" />
     <ClCompile Include="Evaluation.cpp" />
+    <ClCompile Include="Move.cpp" />
     <ClCompile Include="MoveGen.cpp" />
     <ClCompile Include="Search.cpp" />
     <ClCompile Include="TranspositionTable.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Piece.h" />
     <ClInclude Include="Search.h" />
     <ClInclude Include="TranspositionTable.h" />
+    <ClInclude Include="TTEntry.h" />
     <ClInclude Include="UCI.h" />
     <ClInclude Include="ZobristHashing.h" />
   </ItemGroup>

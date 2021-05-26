@@ -7,18 +7,6 @@ class Move {
 
 	public:
 
-		bool LVA_MVV(const Move& first, const Move& second) {
-
-			if (first.piece_type < second.piece_type) return true;
-			if (second.piece_type < first.piece_type) return false;
-
-			if (second.capture < first.capture) return true;
-			if (first.capture < second.capture) return false;
-
-			return false;
-
-		}
-
 		Move();
 
 		int start_index;
@@ -28,9 +16,10 @@ class Move {
 		bool enpassant;
 		char castle;
 		int promotion;
+		int score;
 
 
-		Move(int st, int en, int pt, int ca, bool enp, char cas, int prom) {
+		Move(int st, int en, int pt, int ca, bool enp, char cas, int prom, int scr) {
 			start_index = st;
 			end_index = en;
 			piece_type = pt;
@@ -38,9 +27,11 @@ class Move {
 			enpassant = enp;
 			castle = cas;
 			promotion = prom;
+			score = scr;
 
 		}
 
+		int move_toInt();
 		
 
 };

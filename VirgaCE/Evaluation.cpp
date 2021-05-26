@@ -1,5 +1,7 @@
 #include "Evaluation.h"
 
+// PIECE SQUARE TABLES
+
 const int Evaluation::pawn_pst[7][8] = {
 { },
 {  3,   3,  10,  19,  16,  19,   7,  -5},
@@ -59,7 +61,73 @@ const int Evaluation::queen_pst[8][8] = {
 
 };
 
+const int Evaluation::king_pst[8][8] = {
+{ 271,  327, 271, 198, 198, 271, 327, 271},
+{ 278,  303, 234, 179, 179, 234, 303, 278},
+{ 195,  258, 169, 120, 120, 169, 258, 195},
+{ 164,  190, 138,  98 , 98, 138, 190, 164},
+{ 154,  179, 105,  70, 70, 105, 179, 154},
+{ 123,  145,  81,  31, 31 , 81 , 145, 123},
+{  88,  120,  65,  33, 33, 65, 120, 88},
+{  59,   89,  45,  -1, -1, 45, 89, 59},
+
+};
+
+
+const int Evaluation::knight_mobility[9] = {-30, -25, -6, -2, 1, 6, 11, 13, 16};
+const int Evaluation::bishop_mobility[14] = { -23, -10, 8, 13, 18, 25, 26, 30, 30, 33, 39, 39, 44, 47 };
+const int Evaluation::rook_mobility[15] = { -28, -13, -7, -5, -2, -1, 4, 8, 14, 14, 15, 18, 22, 23, 28 };
+const int Evaluation::queen_mobility[28] = { 0 };
+
+
+
 Evaluation::Evaluation() {
+
+
+}
+
+int Evaluation::sliding_mobility(const BoardRepresentation& board_representation, int index, const int piece_offset[], int size) {
+
+	std::array<int, board_size> board_arr = board_representation.get_chess_board();
+
+	int mobility = 0; 
+
+	for (int i = 0; i < size; ++i) {
+
+		int target_square = index + piece_offset[i];
+
+		if (board_representation.is_on_board(target_square)) ++mobility;
+		
+
+	}
+
+	return mobility;
+
+}
+
+int Evaluation::leaping_mobility(const BoardRepresentation& board_representation, int index, const int piece_offset[], int size) {
+
+	std::array<int, board_size> board_arr = board_representation.get_chess_board();
+
+	int mobility = 0;
+
+	for (int i = 0; i < size; ++i) {
+
+		int target_square = index + piece_offset[i];
+
+		while (board_representation.is_on_board(target_square)) {
+
+			if (board_arr[target_square] > 0) break;
+
+			else ++mobility;
+
+			target_square += piece_offset[i];
+		}
+
+	}
+	
+	return mobility;
+
 
 
 }
@@ -74,6 +142,13 @@ double Evaluation::material_eval(const BoardRepresentation& board_representation
 	int bishops_white = 0, bishops_black = 0;
 	int rooks_white = 0, rooks_black = 0;
 	int queens_white = 0, queens_black = 0;
+	int kings_white = 0, kings_black = 0;
+
+	int mult = 1;
+
+	if (board_representation.get_side() == false) mult = -1;
+
+
 
 	std::array<int, board_size> board_arr = board_representation.get_chess_board();
 	
@@ -82,61 +157,76 @@ double Evaluation::material_eval(const BoardRepresentation& board_representation
 		if (i % 8 == 0 && i != 0 && i < 112) i = i + 8;
 
 		file = i & 7;
-		rank = i >> 4;
+		rank = i / 16;
 
 		switch (board_arr[i]) {
 
 		case (white_pawn): {
 			++pawns_white;
-			int y = pawn_pst[7 - rank][file];
-			x = x + pawn_pst[7 - rank][7 - file];
+			x = x + pawn_pst[rank][file];
 			break;
 		}
 		case (black_pawn): {
 			++pawns_black;
-			int u = pawn_pst[7 - rank][7 - file];
 			x = x - pawn_pst[7 - rank][7 - file];
 			break;
 		}
 		case (white_knight): {
 			++knights_white;
-			int z = knight_pst[7 - rank][7 - file];
-			x = x + knight_pst[7 - rank][7 - file];
+			x = x + knight_pst[rank][file];
+			x += knight_mobility[leaping_mobility(board_representation, i, knight_offset, 8)];
 			break;
 		}
 		case (black_knight): {
 			++knights_black;
-			x = x - knight_pst[7 - rank][7 - file];
+			x =- knight_pst[7 - rank][7 - file];
+			x -= knight_mobility[leaping_mobility(board_representation, i, knight_offset, 8)];
 			break;
 		}
 		case (white_bishop): {
 			++bishops_white;
-			x = x + bishop_pst[7 - rank][7 - file];
+			x = x + bishop_pst[rank][file];
+			x += bishop_mobility[sliding_mobility(board_representation, i, bishop_offset, 4)];
 			break;
 		}
 		case (black_bishop): {
 			++bishops_black;
 			x = x - bishop_pst[7 - rank][7 - file];
+			x -= bishop_mobility[sliding_mobility(board_representation, i, bishop_offset, 4)];
 			break;
 		}
 		case (white_rook): {
 			++rooks_white;
-			x = x + rook_pst[7 - rank][7 - file];
+			x = x + rook_pst[rank][file];
+			x += rook_mobility[sliding_mobility(board_representation, i, rook_offset, 4)];
 			break;
 		}
 		case (black_rook): {
 			++rooks_black;
 			x = x - bishop_pst[7 - rank][7 - file];
+			x -= rook_mobility[sliding_mobility(board_representation, i, rook_offset, 4)];
 			break;
 		}
 		case (white_queen): {
 			++queens_white;
-			x = x + queen_pst[7 - rank][7 - file];
+			x = x + queen_pst[rank][file];
+			x += queen_mobility[sliding_mobility(board_representation, i, queen_offset, 8)];
 			break;
 		}
 		case (black_queen): {
 			++queens_black;
 			x = x - queen_pst[7 - rank][7 - file];
+			x -= queen_mobility[sliding_mobility(board_representation, i, queen_offset, 8)];
+			break;
+		}
+		case (white_king): {
+			++kings_white;
+			x = x + king_pst[rank][file];
+			break;
+		}
+		case (black_king): {
+			++kings_black;
+			x = x - king_pst[7 - rank][7 - file];
 			break;
 		}
 
@@ -145,6 +235,7 @@ double Evaluation::material_eval(const BoardRepresentation& board_representation
 
 	}
 	x = x + 900 * (queens_white - queens_black) + 500 * (rooks_white - rooks_black) + 320 * (bishops_white - bishops_black) + 300* (knights_white - knights_black) + 100 * (pawns_white - pawns_black);
-	//std::cout << x / 100.0 << std::endl;
+	x = x * mult;
+
 	return x/100.0;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 
 // helper variables
 static const int board_size = 128;
@@ -7,7 +8,17 @@ static const int sliding_array_size = 4;
 static const int leaping_array_size = 8;
 static const int queen_array_size = 8;
 
+static const double VALUE_MATED = (SHRT_MIN)/2;
+static const double VALUE_DRAW = 0;
 
+
+static const int HASH_MOVE = 10000;
+static const int PROMOTION_SCORE = 1000;
+
+static const int NULL_ENPASSANT = 13;
+
+
+    
 static const int pawn_offset[3] = { 16, 15, 17 };
 static const int knight_offset[8] = { -33, -31, -18, -14, 14, 18, 31, 33 };
 static const int bishop_offset[4] = { -17, -15, 15, 17};
@@ -15,9 +26,13 @@ static const int rook_offset[4] = { -16,  -1,   1,  16 };
 static const int queen_offset[8] = { -17, -16, -15,  -1,  1, 15, 16, 17 };
 static const int king_offset[8] = { -17, -16, -15,  -1,  1, 15, 16, 17   };
 
+enum Nodes : unsigned int {
+    PV_NODE = 3
+};
+
 
 enum File: unsigned int {
-    file_a = 0,
+    file_a,
     file_b,
     file_c,
     file_d,
@@ -40,7 +55,6 @@ enum Rank: unsigned int {
 
 
 enum Coordinate : const unsigned int {
-
     a1,
     b1,
     c1,

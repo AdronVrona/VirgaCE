@@ -34,8 +34,8 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 		}
 
 		else {
-			int square_index = 0;
 
+			int square_index = 0;
 
 			switch (ch) {
 
@@ -123,7 +123,6 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 				--temp_file;
 				break;
 
-
 			}
 
 			++temp_rank;
@@ -151,6 +150,8 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 
 	iss >> en_passant;
 
+	board_representation.set_enpassant(13);
+
 	if (en_passant != "-") {
 
 		board_representation.set_enpassant(board_representation.return_square(en_passant));
@@ -163,6 +164,7 @@ void BoardInitialization::board_initialization(std::string fen_code, BoardRepres
 
 	board_representation.set_halfmove(half_move);
 
+	board_representation.position_key = ZobristHashing::hash_position(board_representation);
 
 
 }

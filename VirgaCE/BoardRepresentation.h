@@ -1,7 +1,6 @@
 #pragma once
 
 #ifndef boardrepresentation_h
-
 #define boardrepresentation_h
 
 #include <vector>
@@ -27,7 +26,7 @@ class BoardRepresentation {
 		std::map<int, char> for_print;
 		bool side_turn;
 		std::string castling_rights; 
-		unsigned int enpassant;
+		unsigned int enpassant = NULL_ENPASSANT;
 		unsigned int half_move;
 
 
@@ -45,16 +44,18 @@ class BoardRepresentation {
 		void print_piece_lists();
 		int white_king_square;
 		int black_king_square;
+		long position_key;
+		std::array <int, 135> index_convert = { 0 };
 
 		// getters
 
-		inline std::unordered_map<int, int> get_piece_list() const { return piece_list; }
-		inline std::vector<int> get_piece_lists() const { return piece_lists;  }
-		inline std::array<int, board_size> get_chess_board() const { return chess_board; }
-		inline int get_enpassant() const { return enpassant; }
-		inline bool get_side() const { return side_turn; }
-		inline std::string get_castling_rights() const { return castling_rights; }
-		inline int get_halfmove() const { return half_move; }
+		std::unordered_map<int, int> get_piece_list() const { return piece_list; }
+		std::vector<int> get_piece_lists() const { return piece_lists;  }
+		std::array<int, board_size> const & get_chess_board() const { return chess_board; }
+		int get_enpassant() const { return enpassant; }
+		bool get_side() const { return side_turn; }
+		std::string get_castling_rights() const { return castling_rights; }
+		int get_halfmove() const { return half_move; }
 
 		// setters
 		void set_chess_board(std::array<int, board_size> b);
