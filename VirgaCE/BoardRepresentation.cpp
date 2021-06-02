@@ -45,22 +45,16 @@ BoardRepresentation::BoardRepresentation()
 	white_king_square = e1;
 	black_king_square = e8;
 
+	material_total = MATERIAL_TOTAL;
+
+	piece_total = 32;
+
 
 }
 
 void BoardRepresentation::add_piece(unsigned char piece, unsigned char index)
 {
 	chess_board[index] = piece;
-
-	// EXPERIMENTAL THINGS THAT CAN BE DELETED
-
-	//index_board[index] = piece_lists.size();
-	//piece_lists.push_back(index);
-	////piece_list[index] = piece;
-
-	//if (piece_lists.size() == 33) {
-	////	std::cout << "help";
-	//}
 
 }
 
@@ -145,13 +139,17 @@ int BoardRepresentation::return_square(std::string square)
 
 }
 
-void BoardRepresentation::print_piece_lists()
+bool BoardRepresentation::dead_position()
 {
-	for (int i = 0; i < piece_lists.size(); ++i) {
-		std::cout << piece_lists[i];
-		std::cout << std::endl;
-	}
+	if (material_total > 272) return false;
+
+	if (material_total == 260) return false;
+
+	if (material_total <= 272 && piece_count > 3) return false; 
+
+	return true;
 }
+
 
 std::ostream& operator<<(std::ostream& o, std::vector <std::string> vec)
 {

@@ -41,17 +41,21 @@ class BoardRepresentation {
 		void remove_piece(unsigned char index);
 		bool is_on_board(int index) const;
 		int return_square(std::string square);
-		void print_piece_lists();
+		bool dead_position();
+
 		int white_king_square;
 		int black_king_square;
 		long position_key;
+		int piece_total;
+		int material_total;
+		int piece_count; 
 		std::array <int, 135> index_convert = { 0 };
 
 		// getters
 
 		std::unordered_map<int, int> get_piece_list() const { return piece_list; }
 		std::vector<int> get_piece_lists() const { return piece_lists;  }
-		std::array<int, board_size> const & get_chess_board() const { return chess_board; }
+		std::array<int, board_size> get_chess_board() const { return chess_board; }
 		int get_enpassant() const { return enpassant; }
 		bool get_side() const { return side_turn; }
 		std::string get_castling_rights() const { return castling_rights; }

@@ -20,7 +20,7 @@ public:
 	static std::vector<uint64_t> initial_hashvalues;
 
 	static void zobrist_initialization();
-	static long hash_position(BoardRepresentation& board_representation);
+	static long hash_position(const BoardRepresentation& board_representation);
 
 
 

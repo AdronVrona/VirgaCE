@@ -34,7 +34,8 @@ class MoveGen {
 
 		//getters
 		std::vector<Move> get_move_list() { return move_list; }
-		std::vector<Move> get_legal_move_list() { return legal_move_list; }
+		std::vector<Move> &get_legal_move_list() { return legal_move_list; }
+		std::vector <struct irr_info> get_main_info() { return main_info; }
 
 		//generate moves
 		void generate_pl_pawn_moves(const BoardRepresentation& board_representation, int index);

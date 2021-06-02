@@ -13,22 +13,6 @@
 #define TT_CLASS
 
 
-//struct Table_Entry {
-//
-//    long zobrist;
-//    Move m;
-//    int depth;
-//    double eval;
-//    int type;
-//
-//    Table_Entry() {};
-//
-//
-//    Table_Entry(long zobrist, Move m, int depth, double eval, int type) :
-//        zobrist(zobrist), m(m), depth(depth), eval(eval), type(type) {};
-//
-//};
-
 class TranspositionTable {
 
 private:
@@ -43,10 +27,11 @@ public:
 
     TranspositionTable(uint64_t size) {
 
-        table_size = size;
+        table_size = size;  
         uint64_t mb = 1024 * 1024 * size;
         auto xds = mb / sizeof(TTEntry);
-        table = (TTEntry*)std::malloc(mb/sizeof(TTEntry));
+        table = (TTEntry*)std::malloc(mb);
+        std::cout << "size: " << sizeof(TTEntry) << std::endl;
    
     }
 
@@ -57,7 +42,7 @@ public:
        // std::cout << "key: " << key << std::endl;
         //TTEntry entry = get(key);
 
-            int hash = (key % 10000);
+            int hash = (key % table_size);
 
             if (hash < 0) hash = hash * -1;
 
@@ -72,7 +57,7 @@ public:
 
     TTEntry get(int key) {
 
-        int hash = (key % 10000);
+        int hash = (key % table_size);
 
         if (hash < 0) hash = hash * -1;
 
@@ -91,7 +76,7 @@ public:
         TTEntry current = get(ZobristHashing::hash_position(board_representation));
 
        
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 8; ++i) {
 
            // std::cout << "dasdasdsad" << counter << std::endl;
 
@@ -99,6 +84,10 @@ public:
            // std::cout << "end: " << current.move.end_index << std::endl;
 
             Move current_move = current.move;
+
+            std::cout << "start: " << current_move.start_index << std::endl;
+            std::cout << "end: " << current_move.end_index << std::endl;
+            std::cout << std::endl;
 
             current_pv.push_back(current_move);
 

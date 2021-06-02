@@ -33,7 +33,7 @@ void ZobristHashing::zobrist_initialization()
 
 }
 
-long ZobristHashing::hash_position(BoardRepresentation& board_representation)
+long ZobristHashing::hash_position(const BoardRepresentation& board_representation)
 {
 
 	long zobrist_key = 0;

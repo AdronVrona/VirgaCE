@@ -6,6 +6,7 @@
 
 enum piece {
     null_piece = 0x00,
+    neutral_pawn = 0x04,
     neutral_queen = 0x40,
     neutral_rook = 0x20,
     neutral_knight = 0x08,
@@ -26,6 +27,7 @@ enum piece {
     black_rook = 0x22,
     black_queen = 0x42,
     black_king = 0x82,
+    piece_neutral_check = 0xFC,
 };
 
 enum piece_flags {

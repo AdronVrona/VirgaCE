@@ -8,10 +8,11 @@ static const int sliding_array_size = 4;
 static const int leaping_array_size = 8;
 static const int queen_array_size = 8;
 
-static const double VALUE_MATED = (SHRT_MIN)/2;
+static const double VALUE_MATED = SHRT_MIN/2;
+static const double VALUE_MATE = -(SHRT_MIN/2);
 static const double VALUE_DRAW = 0;
 
-
+static const int MATERIAL_TOTAL = 672;
 static const int HASH_MOVE = 10000;
 static const int PROMOTION_SCORE = 1000;
 
@@ -27,6 +28,8 @@ static const int queen_offset[8] = { -17, -16, -15,  -1,  1, 15, 16, 17 };
 static const int king_offset[8] = { -17, -16, -15,  -1,  1, 15, 16, 17   };
 
 enum Nodes : unsigned int {
+    CUT_NODE = 1,
+    ALL_NODE = 2,
     PV_NODE = 3
 };
 

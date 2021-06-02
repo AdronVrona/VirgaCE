@@ -17,7 +17,6 @@ class Evaluation {
 		static const int rook_mobility[15];
 		static const int queen_mobility[28];
 
-
 			
 	public:
 

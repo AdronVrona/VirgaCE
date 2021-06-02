@@ -68,6 +68,12 @@ MoveGen::MoveGen() {
 	for_print_movegen.insert(std::pair<int, std::string>(118, "g8"));
 	for_print_movegen.insert(std::pair<int, std::string>(119, "h8"));
 
+	move_list.reserve(60);
+	legal_move_list.reserve(60);
+
+	made_moves.reserve(20);
+	main_info.reserve(20);
+
 }
 
 
@@ -304,7 +310,7 @@ void MoveGen::generate_legal_moves(BoardRepresentation& board_representation, in
 
 	if (color == white) color_helper = black;
 
-	for (Move& move : move_list) {
+	for (const auto& move : move_list) {
 
 		make_move(board_representation, move);
 
@@ -380,10 +386,13 @@ void MoveGen::generate_pl_castle_moves(const BoardRepresentation& board_represen
 void MoveGen::make_move(BoardRepresentation& board_representation, Move m)
 {
 
-	board_representation.set_enpassant(13);
+	board_representation.set_halfmove(board_representation.get_halfmove() + 1);
+
+	board_representation.set_enpassant(NULL_ENPASSANT);
 
 	if (m.enpassant == true) {
 		if (m.capture > 0) {
+
 			if (m.piece_type == white_pawn) {
 				board_representation.remove_piece(m.end_index - 16);
 				board_representation.position_key ^= ZobristHashing::piece_keys[board_representation.index_convert[black_pawn]][m.end_index - 16];
@@ -459,7 +468,17 @@ void MoveGen::make_move(BoardRepresentation& board_representation, Move m)
 	if (m.castle != ' ') {
 		make_castle(board_representation, m.castle);
 	}
-	if (m.capture > 0) board_representation.position_key ^= ZobristHashing::piece_keys[board_representation.index_convert[m.capture]][m.end_index];
+	if (m.capture > 0) {
+		board_representation.material_total -= m.capture & piece_neutral_check;
+		board_representation.position_key ^= ZobristHashing::piece_keys[board_representation.index_convert[m.capture]][m.end_index];
+		board_representation.set_halfmove(0);
+		--board_representation.piece_total;
+		
+	}
+
+	if (m.piece_type == white_pawn || m.piece_type == black_pawn) {
+		board_representation.set_halfmove(0);
+	}
 	
 	board_representation.remove_piece(m.start_index);
 	board_representation.position_key ^= ZobristHashing::piece_keys[board_representation.index_convert[m.piece_type]][m.start_index];
@@ -488,6 +507,8 @@ void MoveGen::un_make_move(BoardRepresentation& board_representation, Move m)
 
 	main_info.pop_back();
 
+	//std::cout << "main_info size: " << main_info.size() << std::endl;
+
 	if (m.piece_type == white_king) board_representation.white_king_square = m.start_index;
 
 	if (m.piece_type == black_king) board_representation.black_king_square = m.start_index;
@@ -501,6 +522,10 @@ void MoveGen::un_make_move(BoardRepresentation& board_representation, Move m)
 	//board_representation.position_key ^= ZobristHashing::piece_keys[board_representation.index_convert[m.piece_type]][m.end_index];
 
 	if (m.capture > 0) {
+
+		board_representation.material_total += m.capture & piece_neutral_check;
+		++board_representation.piece_total;
+
 		if (m.enpassant) {
 			if (m.piece_type == white_pawn) {
 				board_representation.add_piece(m.capture, m.end_index - 16);
@@ -540,6 +565,7 @@ void MoveGen::un_make_move(BoardRepresentation& board_representation, Move m)
 	
 	board_representation.set_castling_rights(main_info.back().last_castle);
 	board_representation.position_key = main_info.back().last_key;
+	board_representation.set_halfmove(main_info.back().halfmove_clock);
 
 }
 

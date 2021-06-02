@@ -46,47 +46,13 @@ int main()
  
     ZobristHashing::zobrist_initialization();
 
-    bi.board_initialization("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ", br);
+    bi.board_initialization("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", br);
 
     mg.initialize_struct(br);
         
     start = std::clock();
 
-    mg.generate_pseudo_legal_moves(br);
-
-    mg.generate_legal_moves(br, white);
-
-
-    std::vector<Move> moves = (mg.get_legal_move_list());
-
-    for (Move& move : moves) {
-        std::cout << "test array: " << br.index_convert[move.piece_type] << std::endl;
-        std::cout << move.start_index << " " << move.end_index << std::endl;
-        std::cout << "positions key: " << br.position_key << std::endl;
-        std::cout << "hash key: " << ZobristHashing::hash_position(br) << std::endl;
-        mg.make_move(br, move);
-        std::cout << "positions key after move: " << br.position_key << std::endl;
-        std::cout << "new hash key after move: " << ZobristHashing::hash_position(br) << std::endl;
-        mg.un_make_move(br, move);
-        std::cout << "positions key after un make move: " << br.position_key << std::endl;
-        std::cout << "new hash key after un make move: " << ZobristHashing::hash_position(br) << std::endl;
-        mg.make_nullmove(br);
-        std::cout << "positions key after move: " << br.position_key << std::endl;
-        std::cout << "new hash key after move: " << ZobristHashing::hash_position(br) << std::endl;
-        mg.unmake_nullmove(br);
-        std::cout << "positions key after un make move: " << br.position_key << std::endl;
-        std::cout << "new hash key after un make move: " << ZobristHashing::hash_position(br) << std::endl;
-        std::cout << std::endl;
-        std::cout << std::endl;
-
-
-    }
-
-  //  sh.sort_moves(mg.get_legal_move_list());
-
-    
-
-     // sh.search(br);
+    sh.search(br);
 
     //Evaluation::material_eval(br);
 
