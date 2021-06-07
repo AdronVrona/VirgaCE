@@ -16,6 +16,11 @@ static const int MATERIAL_TOTAL = 672;
 static const int HASH_MOVE = 10000;
 static const int PROMOTION_SCORE = 1000;
 
+static const double DELTA_MARGIN = 2.00;
+static const double FUTILITY_MARGIN = 2.00;
+static const double EXTENDED_FMARGIN = 5.00;
+
+
 static const int NULL_ENPASSANT = 13;
 
 

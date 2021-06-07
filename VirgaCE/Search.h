@@ -22,17 +22,23 @@ class Search {
 
 		//
 		std::vector <Move> pv;
+		
 	
 
 	public: 
 
+		int qcounter = 0;
+		int scounter = 0;
+
 		//ESSENTIAL METHODS
 		void search_init();
 		void search(BoardRepresentation& board_representation);
-		double quiescence(BoardRepresentation& board_representation, double alpha, double beta);
+		double quiescence(BoardRepresentation& board_representation, double alpha, double beta, int depth);
 
 		//SEARCH ALGORITHMS
 		double alphaBeta(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta);
+
+		double PVS(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta);
 
 		//double MTDF()
 		//double AlphaBetaWithMemory()
@@ -47,6 +53,9 @@ class Search {
 
 		//HELPER FUNCTIONS
 		bool allowed_null(BoardRepresentation& board_representation, double alpha, double beta);
+		bool allowed_delta(const BoardRepresentation& board_representation);
+		bool allowed_futility(BoardRepresentation& board_representation, int depth, const Move & m);
+		bool allowed_lmr(BoardRepresentation& board_representation, int depth, const Move& m);
 		bool in_check(BoardRepresentation& board_representation);
 		double mate_score(BoardRepresentation& board_representation, int remaining_depth);
 		double mated_score(BoardRepresentation& board_representation, int remaining_depth);

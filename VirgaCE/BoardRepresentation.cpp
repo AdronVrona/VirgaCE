@@ -42,6 +42,18 @@ BoardRepresentation::BoardRepresentation()
 	index_convert[black_queen] = 10;
 	index_convert[black_king] = 11;
 
+	
+	value_convert[white_pawn] = 1.00;
+	value_convert[white_knight] = 3.00;
+	value_convert[white_bishop] = 3.20;
+	value_convert[white_rook] = 5.00;
+	value_convert[white_queen] = 9.00;
+	value_convert[black_pawn] = 1.00;
+	value_convert[black_knight] = 3.00;
+	value_convert[black_bishop] = 3.20;
+	value_convert[black_rook] = 5.00;
+	value_convert[black_queen] = 9.00;
+
 	white_king_square = e1;
 	black_king_square = e8;
 

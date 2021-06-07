@@ -56,6 +56,10 @@ int main()
 
     //Evaluation::material_eval(br);
 
+    std::cout << "q counter: " << sh.qcounter << std::endl;
+    std::cout << "s counter: " << sh.scounter << std::endl;
+
+
 
 
   // -------------------- PERFT -------------------------------//

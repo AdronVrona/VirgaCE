@@ -27,7 +27,7 @@ public:
 
     TranspositionTable(uint64_t size) {
 
-        table_size = size;  
+        table_size = (1024 * 1024 * size)/sizeof(TTEntry);
         uint64_t mb = 1024 * 1024 * size;
         auto xds = mb / sizeof(TTEntry);
         table = (TTEntry*)std::malloc(mb);
@@ -76,7 +76,7 @@ public:
         TTEntry current = get(ZobristHashing::hash_position(board_representation));
 
        
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 11; ++i) {
 
            // std::cout << "dasdasdsad" << counter << std::endl;
 

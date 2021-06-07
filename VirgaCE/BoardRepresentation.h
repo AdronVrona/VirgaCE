@@ -50,6 +50,7 @@ class BoardRepresentation {
 		int material_total;
 		int piece_count; 
 		std::array <int, 135> index_convert = { 0 };
+		std::array <double, 66> value_convert = { 0 };
 
 		// getters
 
