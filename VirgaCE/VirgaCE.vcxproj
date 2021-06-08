@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitBoards.cpp" />
     <ClCompile Include="BoardInitialization.cpp" />
     <ClCompile Include="BoardRepresentation.cpp" />
     <ClCompile Include="Evaluation.cpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="ZobristHashing.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BitBoards.h" />
     <ClInclude Include="BoardInitialization.h" />
     <ClInclude Include="BoardRepresentation.h" />
     <ClInclude Include="Common.h" />

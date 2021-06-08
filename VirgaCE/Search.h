@@ -22,6 +22,8 @@ class Search {
 
 		//
 		std::vector <Move> pv;
+
+		Move killer_moves[2][MAX_DEPTH];
 		
 	
 
@@ -29,6 +31,8 @@ class Search {
 
 		int qcounter = 0;
 		int scounter = 0;
+
+		std::array <int, 8> bfcalc;
 
 		//ESSENTIAL METHODS
 		void search_init();
@@ -40,14 +44,9 @@ class Search {
 
 		double PVS(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta, int pred_node);
 
-		//double MTDF()
-		//double AlphaBetaWithMemory()
-
-		double NegaScout(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta);
-
 
 		//MOVE SORTING
-		std::vector<Move> test_sort(const BoardRepresentation& board_representation, std::vector<Move>& moves);
+		std::vector<Move> test_sort(const BoardRepresentation& board_representation, std::vector<Move>& moves, int depth);
 		std::vector<Move> sort_moves(std::vector<Move> moves);
 		std::vector<Move> quiesence_sort(std::vector<Move>& moves);
 
@@ -62,6 +61,7 @@ class Search {
 		double mated_score(BoardRepresentation& board_representation, int remaining_depth);
 		double check_or_stale(BoardRepresentation& board_representation, int remaining_depth);
 		bool is_threefold(const BoardRepresentation& board_representation);
+		void add_killers(const Move& m, int depth);
 
 
 		Search(MoveGen& mg);

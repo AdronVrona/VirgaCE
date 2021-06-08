@@ -31,7 +31,7 @@ class Move {
 
 		}
 
-		int move_toInt();
+		int move_toInt() const;
 		
 
 };

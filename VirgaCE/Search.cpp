@@ -60,7 +60,7 @@ double Search::alphaBeta(BoardRepresentation& board_representation, int depth, i
 
 	else move_generator.generate_legal_moves(board_representation, black);
 
-	std::vector<Move> moves = test_sort(board_representation, move_generator.get_legal_move_list());
+	std::vector<Move> moves = test_sort(board_representation, move_generator.get_legal_move_list(), depth);
 
 	//std::vector<Move> moves = sort_moves(move_generator.get_legal_move_list());
 
@@ -101,8 +101,6 @@ double Search::alphaBeta(BoardRepresentation& board_representation, int depth, i
 double Search::PVS(BoardRepresentation& board_representation, int depth, int root_distance, double alpha, double beta, int pred_node) 
 {
 
-	++scounter;
-
 	//CHECK FOR DRAWS
 
 	if (board_representation.dead_position() || is_threefold(board_representation) || board_representation.get_halfmove() > 100)  return VALUE_DRAW;
@@ -122,6 +120,7 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 	//CHECK TRANSPOSITION TABLE
 
+	/*
 	if (pred_node == NON_PV) {
 
 		auto tt_entry = hash_tt->get(board_representation.position_key);
@@ -135,6 +134,7 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 
 	}
+	*/
 
 	//MATE DISTANCE PRUNING
 
@@ -198,7 +198,7 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 	else move_generator.generate_legal_moves(board_representation, black);
 
-	std::vector<Move> moves = test_sort(board_representation, move_generator.get_legal_move_list());
+	std::vector<Move> moves = test_sort(board_representation, move_generator.get_legal_move_list(), depth);
 
 	//std::vector<Move> moves = sort_moves(move_generator.get_legal_move_list());
 
@@ -212,6 +212,8 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 			move_generator.make_move(board_representation, move);
 
+			++scounter;
+
 			best_score = -PVS(board_representation, depth - 1, root_distance + 1, -beta, -alpha, PV_NODE);
 
 			move_generator.un_make_move(board_representation, move);
@@ -220,7 +222,7 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 				best_move = move;
 
-				hash_tt->put(ZobristHashing::hash_position(board_representation), best_move, depth, best_score, PV_NODE);
+				hash_tt->put(ZobristHashing::hash_position(board_representation), best_move, depth, best_score, EXPER_PV_ONE);
 
 				if (best_score >= beta) {
 					//std::cout << "is this possible" << std::endl;
@@ -267,9 +269,13 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 				}
 			}
 
+			++scounter;
+
 			eval = -PVS(board_representation, depth_reduction - 1, root_distance + 1, -alpha - 1, -alpha, NON_PV);
 
 			if (eval > alpha && eval < beta) {
+
+				++scounter;
 
 				eval = -PVS(board_representation, depth - 1, root_distance + 1, -beta, -alpha, PV_NODE);
 
@@ -281,13 +287,23 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 				alpha = eval;
 				best_move = move;
 
-				if (eval <= beta) {
-					hash_tt->put(ZobristHashing::hash_position(board_representation), move, depth, eval, PV_NODE);
+				if (pred_node == PV_NODE) {
+
+					hash_tt->put(ZobristHashing::hash_position(board_representation), best_move, depth, eval, EXPER_PV_TWO);
+
 				}
 			}
 
 			if (eval > best_score) {
+
 				if (eval >= beta) {
+
+					if (!(move.capture > 0 || move.promotion > 0)) {
+
+						add_killers(move, depth);
+
+					}
+
 					return eval;
 				}
 
@@ -302,7 +318,7 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 		best_score = check_or_stale(board_representation, depth);
 	}
 
-	hash_tt->put(ZobristHashing::hash_position(board_representation), best_move, depth, best_score, NON_PV);
+	//hash_tt->put(ZobristHashing::hash_position(board_representation), best_move, depth, eval, NON_PV);
 
 	return best_score;
 }
@@ -324,13 +340,18 @@ void Search::search(BoardRepresentation& board_representation)
 
 	// ITERATIVE DEEPENING
 
-	for (int depth = 1; depth < 9; ++depth) {
+	for (int depth = 1; depth < 7; ++depth) {
 
 		//std::cout << std::endl;
 		//std::cout << "depth: " << depth << std::endl;
 		//std::cout << std::endl;
 
 	eval = PVS(board_representation, depth, 0, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), PV_NODE);
+
+	bfcalc[depth] = scounter + qcounter;
+
+	std::cout << "node count: " << scounter + qcounter << std::endl;
+	scounter, qcounter = 0;
 
 	}
 
@@ -370,9 +391,9 @@ double Search::quiescence(BoardRepresentation& board_representation, double alph
 			if (stand_pat + piece_value + DELTA_MARGIN <= alpha) continue;
 		}
 
-		++qcounter;
-
 		move_generator.make_move(board_representation, move);
+
+		++qcounter;
 
 		double eval = -quiescence(board_representation, -beta, -alpha, depth - 1);
 
@@ -433,123 +454,26 @@ std::vector<Move> Search::quiesence_sort(std::vector<Move>& moves)
 
 }
 
-double Search::NegaScout(BoardRepresentation& board_representation, int depth, int root_distance, double alpha, double beta)
-{
-
-	//std::cout << "depth: " << depth << std::endl;
-
-	//if (depth == 0) return Evaluation::material_eval(board_representation);
-
-	//CHECK FOR DRAWS
-
-	if (board_representation.dead_position() || is_threefold(board_representation) || board_representation.get_halfmove() > 100)  return VALUE_DRAW;
-
-	//if (depth == 0) return quiescence(board_representation, alpha, beta);
-
-	double curr_score = std::numeric_limits<int>::min();
-	int x = 3;
 
 
-	//CHECK TRANSPOSITION TABLE
-
-	//auto tt_entry = hash_tt->get(board_representation.position_key);
-
-
-	//MATE DISTANCE PRUNING
-
-	alpha = std::max(mated_score(board_representation, root_distance), alpha) - 1;
-	beta = std::min(mate_score(board_representation, root_distance), beta) + 1;
-
-	if (alpha >= beta) return alpha;
-
-	//NULL MOVE PRUNING
-
-	double static_eval = Evaluation::material_eval(board_representation);
-
-	int R = 3;
-
-	if (allowed_null(board_representation, alpha, beta) && static_eval > beta && depth > (R + 1)) {
-
-		move_generator.make_nullmove(board_representation);
-
-		double eval = -NegaScout(board_representation, depth - R - 1, root_distance + 1, -beta, -alpha);
-
-		move_generator.unmake_nullmove(board_representation);
-
-		if (eval >= beta) return beta;
-	}
-
-	// -------------------------------------------------------------//
-
-	double max_eval = std::numeric_limits<int>::min();
-
-	move_generator.generate_pseudo_legal_moves(board_representation);
-
-	if (board_representation.get_side()) move_generator.generate_legal_moves(board_representation, white);
-
-	else move_generator.generate_legal_moves(board_representation, black);
-
-	std::vector<Move> moves = test_sort(board_representation, move_generator.get_legal_move_list());
-
-	//std::vector<Move> moves = sort_moves(move_generator.get_legal_move_list());
-
-	double b = beta;
-	unsigned int move_count = 0;
-
-	for (const auto& move : moves) {
-
-		move_generator.make_move(board_representation, move);
-
-		double eval = -NegaScout(board_representation, depth - 1, root_distance + 1, -b, -alpha);
-
-		if ((eval > alpha) && (eval < beta) && (move_count > 1)) {
-			eval = -NegaScout(board_representation, depth - 1, root_distance + 1, -beta, -alpha);
-		}
-
-		move_generator.un_make_move(board_representation, move);
-
-		if (eval > alpha) {
-
-			alpha = eval;
-
-			hash_tt->put(ZobristHashing::hash_position(board_representation), move, depth, eval, PV_NODE);
-		}
-
-		if (eval > curr_score) {
-			curr_score = eval;
-			best_move = move;
-		}
-
-		if (alpha >= beta) {
-			return alpha;
-		}
-
-		b = alpha + 1;
-		++move_count;
-
-	}
-
-	//CHECKMATE OR STALEMATE
-	if (moves.size() == 0) {
-		return mated_score(board_representation, depth);
-	}
-
-
-	return alpha;
-}
-
-std::vector<Move> Search::test_sort(const BoardRepresentation& board_representation, std::vector<Move>& moves) {
+std::vector<Move> Search::test_sort(const BoardRepresentation& board_representation, std::vector<Move>& moves, int depth) {
 
 	Move hash_move = hash_tt->get(ZobristHashing::hash_position(board_representation)).move;
 	//Move hash_move = hash_tt->get(board_representation.position_key).move;
 
 	for (auto& move : moves) {
 
-		if (move.move_toInt() == hash_move.move_toInt()) move.score = HASH_MOVE;
+		int move_int = move.move_toInt();
+
+		if (move_int == hash_move.move_toInt()) move.score = HASH_MOVE;
 
 		else if (move.promotion > 0) move.score = PROMOTION_SCORE + move.promotion;
 
-		else move.score = 10 * move.capture - move.piece_type;
+		else if (move_int == killer_moves[0][depth].move_toInt()) move.score = KILLER_ONE;
+
+		else if (move_int == killer_moves[1][depth].move_toInt()) move.score = KILLER_TWO;
+
+		else move.score = 15 * move.capture - move.piece_type;
 
 	}
 
@@ -619,6 +543,15 @@ bool Search::is_threefold(const BoardRepresentation& board_representation)
 	}
 
 	return false;
+}
+
+void Search::add_killers(const Move& m, int depth)
+{
+
+	if (killer_moves[0][depth].move_toInt() == m.move_toInt()) killer_moves[1][depth] = m;
+
+	else killer_moves[0][depth] = m;
+
 }
 
 bool Search::allowed_delta(const BoardRepresentation& board_representation)

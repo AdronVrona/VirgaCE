@@ -13,13 +13,17 @@ static const double VALUE_MATE = -(SHRT_MIN/2);
 static const double VALUE_DRAW = 0;
 
 static const int MATERIAL_TOTAL = 672;
-static const int HASH_MOVE = 10000;
-static const int PROMOTION_SCORE = 1000;
+static const int HASH_MOVE = 20000;
+static const int PROMOTION_SCORE = 15000;
+static const int KILLER_ONE = 2;
+static const int KILLER_TWO = 1;
 
 static const double DELTA_MARGIN = 2.00;
 static const double FUTILITY_MARGIN = 2.00;
 static const double EXTENDED_FMARGIN = 5.00;
 static const double RAZOR_MARGIN = 8.00;
+
+static const int MAX_DEPTH = 12;
 
 
 static const int NULL_ENPASSANT = 13;
@@ -37,7 +41,9 @@ enum Nodes : unsigned int {
     PV_NODE = 1,
     ALL_NODE = 2,
     CUT_NODE = 3,
-    NON_PV = 4
+    NON_PV = 4,
+    EXPER_PV_ONE = 5,
+    EXPER_PV_TWO = 6
 };
 
 

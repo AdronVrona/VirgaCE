@@ -76,7 +76,7 @@ public:
         TTEntry current = get(ZobristHashing::hash_position(board_representation));
 
        
-        for (int i = 0; i < 11; ++i) {
+        for (int i = 0; i < 8; ++i) {
 
            // std::cout << "dasdasdsad" << counter << std::endl;
 
@@ -87,6 +87,7 @@ public:
 
             std::cout << "start: " << current_move.start_index << std::endl;
             std::cout << "end: " << current_move.end_index << std::endl;
+            std::cout << "node: " << current.type << std::endl;
             std::cout << std::endl;
 
             current_pv.push_back(current_move);
