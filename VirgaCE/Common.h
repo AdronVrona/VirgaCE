@@ -19,6 +19,7 @@ static const int PROMOTION_SCORE = 1000;
 static const double DELTA_MARGIN = 2.00;
 static const double FUTILITY_MARGIN = 2.00;
 static const double EXTENDED_FMARGIN = 5.00;
+static const double RAZOR_MARGIN = 8.00;
 
 
 static const int NULL_ENPASSANT = 13;
@@ -33,9 +34,10 @@ static const int queen_offset[8] = { -17, -16, -15,  -1,  1, 15, 16, 17 };
 static const int king_offset[8] = { -17, -16, -15,  -1,  1, 15, 16, 17   };
 
 enum Nodes : unsigned int {
-    CUT_NODE = 1,
+    PV_NODE = 1,
     ALL_NODE = 2,
-    PV_NODE = 3
+    CUT_NODE = 3,
+    NON_PV = 4
 };
 
 

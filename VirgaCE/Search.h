@@ -38,7 +38,7 @@ class Search {
 		//SEARCH ALGORITHMS
 		double alphaBeta(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta);
 
-		double PVS(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta);
+		double PVS(BoardRepresentation& board_representation, int depth, int remaining_depth, double alpha, double beta, int pred_node);
 
 		//double MTDF()
 		//double AlphaBetaWithMemory()
@@ -56,6 +56,7 @@ class Search {
 		bool allowed_delta(const BoardRepresentation& board_representation);
 		bool allowed_futility(BoardRepresentation& board_representation, int depth, const Move & m);
 		bool allowed_lmr(BoardRepresentation& board_representation, int depth, const Move& m);
+		bool allowed_razoring(BoardRepresentation& board_representation, int depth);
 		bool in_check(BoardRepresentation& board_representation);
 		double mate_score(BoardRepresentation& board_representation, int remaining_depth);
 		double mated_score(BoardRepresentation& board_representation, int remaining_depth);

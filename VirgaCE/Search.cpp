@@ -98,7 +98,7 @@ double Search::alphaBeta(BoardRepresentation& board_representation, int depth, i
 	return max_eval;
 }
 
-double Search::PVS(BoardRepresentation& board_representation, int depth, int root_distance, double alpha, double beta) 
+double Search::PVS(BoardRepresentation& board_representation, int depth, int root_distance, double alpha, double beta, int pred_node) 
 {
 
 	++scounter;
@@ -122,8 +122,19 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 	//CHECK TRANSPOSITION TABLE
 
-	//auto tt_entry = hash_tt->get(board_representation.position_key);
+	if (pred_node == NON_PV) {
 
+		auto tt_entry = hash_tt->get(board_representation.position_key);
+
+		if (tt_entry.depth >= depth) {
+
+			if (pred_node == NON_PV) return tt_entry.eval;
+
+			if (pred_node == PV_NODE && tt_entry.eval > alpha && tt_entry.eval < beta) return tt_entry.eval;
+		}
+
+
+	}
 
 	//MATE DISTANCE PRUNING
 
@@ -132,15 +143,53 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 	if (alpha >= beta) return alpha;
 
+
 	//INITIALIZE SEARCH VARIABLES
-
-
 
 	double best_score = std::numeric_limits<int>::min();
 	int depth_reduction = depth;
-	bool pv_node = true;
 	double eval = 0;
 	bool current_check = in_check(board_representation);
+	bool first_move = true;
+	double static_eval = Evaluation::material_eval(board_representation);
+
+
+	//REVERSE FUTILITY PRUNING
+
+	if (pred_node == NON_PV && !current_check) {
+
+		if ((depth == 1 && static_eval >= beta + FUTILITY_MARGIN) ||
+			(depth == 2 && static_eval >= beta + EXTENDED_FMARGIN)) return static_eval;
+
+	}
+
+
+	//NULL MOVE PRUNING
+
+	int R = 3;
+
+	if (pred_node == NON_PV && allowed_null(board_representation, alpha, beta) && static_eval > beta && depth > (R + 1)) {
+
+		move_generator.make_nullmove(board_representation);
+
+		double eval = -PVS(board_representation, depth - R - 1, root_distance + 1, -beta, -alpha, NON_PV);
+
+		move_generator.unmake_nullmove(board_representation);
+
+		if (eval >= beta) return beta;
+	}
+
+
+	//LIMITED RAZORING
+
+	if (pred_node == NON_PV && board_representation.material_total <= 360 && !current_check) {
+
+		if (static_eval + RAZOR_MARGIN <= alpha)
+
+			depth_reduction--;
+
+	}
+
 
 
 	move_generator.generate_pseudo_legal_moves(board_representation);
@@ -153,19 +202,17 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 	//std::vector<Move> moves = sort_moves(move_generator.get_legal_move_list());
 
-	double static_eval = Evaluation::material_eval(board_representation);
-
 	for (const auto& move : moves) {
 
-		//PV NODE SEARCH
+		// FIRST MOVE
 
-		if (pv_node) {
+		if (first_move) {
 
-			pv_node = false;
+			first_move = false;
 
 			move_generator.make_move(board_representation, move);
 
-			best_score = -PVS(board_representation, depth - 1, root_distance + 1, -beta, -alpha);
+			best_score = -PVS(board_representation, depth - 1, root_distance + 1, -beta, -alpha, PV_NODE);
 
 			move_generator.un_make_move(board_representation, move);
 
@@ -185,39 +232,12 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 
 		}
 
-		//NON-ROOT NODES
+		// REMAINING MOVES
 
 		else {
 
-			//REVERSE FUTILITY PRUNING
-
-			if (!in_check(board_representation)) {
-
-				if ((depth == 1 && static_eval >= beta + FUTILITY_MARGIN) ||
-				   (depth == 2 && static_eval >= beta + EXTENDED_FMARGIN)) return static_eval;
-
-			}
-
-			//LIMITED RAZORING
-
-			if (depth == 3)
-
-			//NULL MOVE PRUNING
-
-			int R = 3;
-
-			if (allowed_null(board_representation, alpha, beta) && static_eval > beta && depth > (R + 1)) {
-
-				move_generator.make_nullmove(board_representation);
-
-				double eval = -PVS(board_representation, depth - R - 1, root_distance + 1, -beta, -alpha);
-
-				move_generator.unmake_nullmove(board_representation);
-
-				if (eval >= beta) return beta;
-			}
-
 			move_generator.make_move(board_representation, move);
+
 
 			// FUTILITY PRUNING
 
@@ -247,11 +267,11 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 				}
 			}
 
-			eval = -PVS(board_representation, depth_reduction - 1, root_distance + 1, -alpha - 1, -alpha);
+			eval = -PVS(board_representation, depth_reduction - 1, root_distance + 1, -alpha - 1, -alpha, NON_PV);
 
 			if (eval > alpha && eval < beta) {
 
-				eval = -PVS(board_representation, depth - 1, root_distance + 1, -beta, -alpha);
+				eval = -PVS(board_representation, depth - 1, root_distance + 1, -beta, -alpha, PV_NODE);
 
 			}
 
@@ -282,6 +302,7 @@ double Search::PVS(BoardRepresentation& board_representation, int depth, int roo
 		best_score = check_or_stale(board_representation, depth);
 	}
 
+	hash_tt->put(ZobristHashing::hash_position(board_representation), best_move, depth, best_score, NON_PV);
 
 	return best_score;
 }
@@ -303,13 +324,13 @@ void Search::search(BoardRepresentation& board_representation)
 
 	// ITERATIVE DEEPENING
 
-	for (int depth = 1; depth < 8; ++depth) {
+	for (int depth = 1; depth < 9; ++depth) {
 
 		//std::cout << std::endl;
 		//std::cout << "depth: " << depth << std::endl;
 		//std::cout << std::endl;
 
-	eval = PVS(board_representation, depth, 0, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+	eval = PVS(board_representation, depth, 0, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), PV_NODE);
 
 	}
 
